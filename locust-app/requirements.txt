@@ -1,0 +1,11 @@
+# OpenTelemetry dependencies
+opentelemetry-api==1.33.1
+opentelemetry-sdk==1.33.1
+opentelemetry-exporter-otlp==1.33.1
+
+# Locust for load testing
+locust==2.32.2
+
+# for docker cpu and memory info
+requests_unixsocket==0.3.0
+requests_unixsocket2

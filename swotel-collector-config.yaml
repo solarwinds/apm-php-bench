@@ -1,0 +1,40 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+extensions:
+  solarwinds:
+    collector_name: "apm-php-swotel-collector" # Required parameter
+    grpc: &grpc_settings
+      endpoint: "otel.collector.na-01.st-ssp.solarwinds.com:443"
+      tls:
+        insecure: false
+      headers:
+        Authorization: "Bearer ${env:SOLARWINDS_TOKEN}"
+
+exporters:
+  otlp:
+    <<: *grpc_settings
+
+service:
+  extensions: [solarwinds]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
