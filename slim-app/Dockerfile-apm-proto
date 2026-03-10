@@ -23,9 +23,6 @@ RUN fileserver=$(test ${APM_RELEASE} = GA && echo "agent-binaries.cloud.solarwin
       --url=https://${fileserver}/apm/php \
       --version=${APM_VERSION}
 
-# RUN echo "solarwinds-apm.debug_level = 6" >> /usr/local/etc/php/conf.d/solarwinds-apm.ini
-
-
 WORKDIR /var/www/html
 
 # Copy application code
