@@ -1,8 +1,5 @@
 from os import environ
-import random
-
 from locust import HttpUser, task, between, events
-
 from opentelemetry import metrics
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.sdk.resources import Resource
@@ -36,7 +33,7 @@ meter_provider = MeterProvider(
 )
 metrics.set_meter_provider(meter_provider)
 
-otel_meter = meter_provider.get_meter("apm-php-benchmark")
+otel_meter = meter_provider.get_meter("apm-php-bench")
 http_response_time = otel_meter.create_histogram(
     name="apm.php.benchmark.response.time",
     description="measures the duration of the inbound HTTP request",
@@ -45,89 +42,31 @@ http_response_time = otel_meter.create_histogram(
 
 requests_tracker = {
     "uninstrumented": {"request_count" : 0, "request_time" : 0 },
-    "oboe": {"request_count" : 0, "request_time" : 0 },
-    "otel": {"request_count" : 0, "request_time" : 0 },
-    "alpha": {"request_count" : 0, "request_time" : 0 },
-    "dev": {"request_count" : 0, "request_time" : 0 }
+    "9.0.0-alpha.1": {"request_count" : 0, "request_time" : 0 },
+    "8.13.0": {"request_count" : 0, "request_time" : 0 },
 }
 
 
 class FlaskSwarmUser(HttpUser):
     wait_time = between(0.25, 0.5)  # 0.25-0.5 seconds
-
-    # @task
-    # def request_uninstrumented(self):
-    #     self.client.get(
-    #         "http://nginx-uninstrumented/complex",
-    #         name="uninstrumented",
-    #     )
-    # @task
-    # def request_oboe(self):
-    #     self.client.get(
-    #         "http://nginx-oboe/complex",
-    #         name="oboe",
-    #     )
     @task
-    def request_otel(self):
+    def request_uninstrumented(self):
         self.client.get(
-            "http://nginx-otel/complex",
-            name="otel",
+            "http://nginx-uninstrumented/complex",
+            name="uninstrumented",
         )
     @task
     def request_alpha(self):
         self.client.get(
-            "http://nginx-alpha/complex",
-            name="alpha",
+            "http://nginx-apm-php/complex",
+            name="9.0.0-alpha.1",
         )
-    # @task
-    # def request_dev(self):
-    #     self.client.get(
-    #         "http://nginx-dev/complex",
-    #         name="dev",
-    #     )
-    # @task
-    # def request_metrics_endpoints(self):
-    #     # Headers to execute more custom sampling logic if APM-instrumented
-    #     # with new otel context for each request
-    #     trace_id = "".join(random.choices("0123456789abcdef", k=32))
-    #     span_id = "".join(random.choices("0123456789abcdef", k=16))
-    #     tracestate_span_id = "".join(random.choices("0123456789abcdef", k=16))
-    #     trace_flags = "01"
-    #     traceparent = "00-{}-{}-{}".format(trace_id, span_id, trace_flags)
-    #     tracestate = "sw={}-{}".format(tracestate_span_id, trace_flags)
-    #     http_headers = {
-    #         "traceparent": traceparent,
-    #         "tracestate": tracestate,
-    #         "x-trace-options": (
-    #             "trigger-trace;custom-from=frank;foo=bar;"
-    #             "sw-keys=custom-sw-from:herbert,baz:qux;ts={}".format(1234567890)
-    #         ),
-    #     }
-    #     # self.client.get(
-    #     #     "http://nginx-uninstrumented/complex",
-    #     #     name="uninstrumented",
-    #     #     headers=http_headers,
-    #     # )
-    #     # self.client.get(
-    #     #     "http://nginx-oboe/complex",
-    #     #     name="oboe",
-    #     #     headers=http_headers,
-    #     # )
-    #     self.client.get(
-    #         "http://nginx-otel/complex",
-    #         name="otel",
-    #         headers=http_headers,
-    #     )
-    #     self.client.get(
-    #         "http://nginx-alpha/complex",
-    #         name="alpha",
-    #         headers=http_headers,
-    #     )
-    #     self.client.get(
-    #         "http://nginx-dev/complex",
-    #         name="dev",
-    #         headers=http_headers,
-    #     )
+    @task
+    def request_apm_proto(self):
+        self.client.get(
+            "http://nginx-apm-proto/complex",
+            name="8.13.0",
+        )
 
 
 @events.request.add_listener

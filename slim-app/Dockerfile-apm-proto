@@ -1,0 +1,41 @@
+# Stage 1: Build PHP dependencies
+FROM composer:2 AS composer_build
+
+# Stage 2: Build the PHP-FPM application image
+FROM php:8.4-fpm-alpine
+
+COPY --from=composer_build /usr/bin/composer /usr/local/bin/composer
+
+RUN apk add $PHPIZE_DEPS
+
+# APM agent
+## always use the latest install wrapper
+RUN curl -sSO https://agent-binaries.cloud.solarwinds.com/apm/php/latest/solarwinds-apm-php.sh
+## install specific version from GA or RC
+ARG APM_RELEASE=GA
+ARG APM_VERSION=latest
+ARG APM_SERVICE_KEY=token:unknown
+ARG APM_COLLECTOR=apm.collector.na-01.cloud.solarwinds.com
+RUN fileserver=$(test ${APM_RELEASE} = GA && echo "agent-binaries.cloud.solarwinds.com" || echo "agent-binaries.global.st-ssp.solarwinds.com");\
+    sh solarwinds-apm-php.sh \
+      --service-key=${APM_SERVICE_KEY} \
+      --collector=${APM_COLLECTOR} \
+      --url=https://${fileserver}/apm/php \
+      --version=${APM_VERSION}
+
+RUN echo "solarwinds-apm.debug_level = 6" >> /usr/local/etc/php/conf.d/solarwinds-apm.ini
+RUN echo "\n" >> /usr/local/etc/php/conf.d/solarwinds-apm.ini
+
+
+WORKDIR /var/www/html
+
+# Copy application code
+COPY index.php .
+COPY composer-uninstrumented.json ./composer.json
+
+RUN composer install
+
+# Expose port for PHP-FPM
+EXPOSE 9000
+
+CMD ["php-fpm"]

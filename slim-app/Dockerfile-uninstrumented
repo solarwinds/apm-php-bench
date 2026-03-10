@@ -6,18 +6,11 @@ FROM php:8.4-fpm-alpine
 
 COPY --from=composer_build /usr/bin/composer /usr/local/bin/composer
 
-RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS
-
-RUN pecl install opentelemetry && \
-    docker-php-ext-enable opentelemetry
-
-RUN apk del .build-deps
-
 WORKDIR /var/www/html
 
 # Copy application code
 COPY index.php .
-COPY composer-otel.json ./composer.json
+COPY composer-uninstrumented.json ./composer.json
 
 RUN composer install
 

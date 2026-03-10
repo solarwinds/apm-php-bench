@@ -7,8 +7,6 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 exporters:
-  debug:
-    verbosity: detailed
   otlp:
     endpoint: ${env:OTEL_COLLECTOR}
     headers:

@@ -11,9 +11,9 @@ processors:
 
 extensions:
   solarwinds:
-    collector_name: "apm-php-swotel-collector" # Required parameter
+    collector_name: ${env:COLLECTOR_NAME:-apm-php-bench-collector}
     grpc: &grpc_settings
-      endpoint: "otel.collector.na-01.st-ssp.solarwinds.com:443"
+      endpoint: ${env:OTEL_COLLECTOR}
       tls:
         insecure: false
       headers:

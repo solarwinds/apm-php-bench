@@ -8,19 +8,17 @@ COPY --from=composer_build /usr/bin/composer /usr/local/bin/composer
 
 RUN apk add $PHPIZE_DEPS
 
-RUN pecl install opentelemetry && \
-    docker-php-ext-enable opentelemetry
-
 RUN wget https://github.com/php/pie/releases/latest/download/pie.phar
 RUN chmod +x pie.phar
 RUN mv pie.phar /usr/local/bin/pie
+RUN pie install open-telemetry/ext-opentelemetry
 RUN pie install solarwinds/apm_ext
 
 WORKDIR /var/www/html
 
 # Copy application code
 COPY index.php .
-COPY composer-alpha.json ./composer.json
+COPY composer-apm-php.json ./composer.json
 
 RUN composer install
 
