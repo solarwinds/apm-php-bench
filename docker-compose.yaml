@@ -72,7 +72,7 @@ services:
       dockerfile: Dockerfile-apm-php
     environment:
       - OTEL_PHP_AUTOLOAD_ENABLED=true
-      - OTEL_LOG_LEVEL=debug
+      - OTEL_LOG_LEVEL=warn
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector-apm-php:4318}
       - OTEL_SERVICE_NAME=apm-php-bench-php-fpm-apm-php
       - OTEL_TRACES_SAMPLER=solarwinds_http
@@ -87,10 +87,10 @@ services:
       context: slim-app
       dockerfile: Dockerfile-apm-proto
       args:
-        - ARG APM_RELEASE=GA
-        - ARG APM_VERSION=latest
-        - ARG APM_SERVICE_KEY=${SW_APM_TOKEN:-token}:apm-php-bench-php-fpm-apm-proto
-        - ARG APM_COLLECTOR=${SW_APM_COLLECTOR:-collector}
+        - APM_RELEASE=GA
+        - APM_VERSION=latest
+        - APM_SERVICE_KEY=${SW_APM_TOKEN:-token}:apm-php-bench-php-fpm-apm-proto
+        - APM_COLLECTOR=${SW_APM_COLLECTOR:-collector}
 
   apm-php-bench-locust:
     build:
