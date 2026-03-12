@@ -26,7 +26,7 @@ The default benchmark target route is `/complex`, which intentionally creates sp
 | Slim + apm-proto   | `nginx-apm-proto` -> `php-fpm-apm-proto`           | Current GA Solarwinds APM PHP library                                                                                                                                                                                            | `8002`    |
 | Load generator     | `apm-php-bench-locust`                             | Headless Locust workload + custom OTLP metric                                                                                                                                                                                    | n/a       |
 | Collector (Locust) | `otel-collector-locust`                            | Forwards OTLP data with bearer token                                                                                                                                                                                             | n/a       |
-| Collector (App)    | `otel-collector-apm-php`                           | SolarWinds OTel collector image                                                                                                                                                                                                  | n/a       |
+| Collector (App)    | `otel-collector-apm-php`                           | Forwards telemetry from APM PHP alpha to backend                                                                                                                                                                                                  | n/a       |
 
 ## Prerequisites
 
