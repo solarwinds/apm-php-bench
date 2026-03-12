@@ -8,25 +8,25 @@ This stack runs:
 
 - A Slim PHP app in 3 variants:
   - `uninstrumented` (uninstrumented)
-  - `apm-php` ([solarwinds/apm](https://packagist.org/packages/solarwinds/apm) + [solarwinds/apm_ext](https://packagist.org/packages/solarwinds/apm_ext) + [swotel collector](https://github.com/solarwinds/solarwinds-otel-collector-releases))
-  - `apm-proto` (Current GA Solarwinds APM PHP library)
+  - `apm-php-9-alpha` ([solarwinds/apm](https://packagist.org/packages/solarwinds/apm) + [solarwinds/apm_ext](https://packagist.org/packages/solarwinds/apm_ext) + [swotel collector](https://github.com/solarwinds/solarwinds-otel-collector-releases))
+  - `apm-8` (Current GA Solarwinds APM PHP library)
 - A Locust load generator that continuously hits all 3 variants.
 - Two collectors:
   - `otel-collector-locust` for Locust OTLP metrics export
-  - `otel-collector-apm-php` for [solarwinds/apm](https://packagist.org/packages/solarwinds/apm) telemetry export
+  - `otel-collector-apm-php-9-alpha` for [solarwinds/apm](https://packagist.org/packages/solarwinds/apm) telemetry export
 
 The default benchmark target route is `/complex`, which intentionally creates spans and emits app-side metrics/logs to stress instrumentation overhead.
 
 ## Architecture
 
-| Component          | Service name                                       | Purpose                                                                                                                                                                                                                          | Host port |
-|--------------------|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| Slim baseline      | `nginx-uninstrumented` -> `php-fpm-uninstrumented` | No APM instrumentation                                                                                                                                                                                                           | `8000`    |
-| Slim + apm-php     | `nginx-apm-php` -> `php-fpm-apm-php`               | [solarwinds/apm](https://packagist.org/packages/solarwinds/apm) + [solarwinds/apm_ext](https://packagist.org/packages/solarwinds/apm_ext) + [swotel collector](https://github.com/solarwinds/solarwinds-otel-collector-releases) | `8001`    |
-| Slim + apm-proto   | `nginx-apm-proto` -> `php-fpm-apm-proto`           | Current GA Solarwinds APM PHP library                                                                                                                                                                                            | `8002`    |
-| Load generator     | `apm-php-bench-locust`                             | Headless Locust workload + custom OTLP metric                                                                                                                                                                                    | n/a       |
-| Collector (Locust) | `otel-collector-locust`                            | Forwards telemetry from Locust to backend                                                                                                                                                                                             | n/a       |
-| Collector (App)    | `otel-collector-apm-php`                           | Forwards telemetry from APM PHP alpha to backend                                                                                                                                                                                                  | n/a       |
+| Component              | Service name                                         | Purpose                                                                                                                                                                                                                          | Host port |
+|------------------------|------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| Slim baseline          | `nginx-uninstrumented` -> `php-fpm-uninstrumented`   | No APM instrumentation                                                                                                                                                                                                           | `8000`    |
+| Slim + apm-php-9-alpha | `nginx-apm-php-9-alpha` -> `php-fpm-apm-php-9-alpha` | [solarwinds/apm](https://packagist.org/packages/solarwinds/apm) + [solarwinds/apm_ext](https://packagist.org/packages/solarwinds/apm_ext) + [swotel collector](https://github.com/solarwinds/solarwinds-otel-collector-releases) | `8001`    |
+| Slim + apm-8           | `nginx-apm-8` -> `php-fpm-apm-8`                     | Current GA Solarwinds APM PHP library                                                                                                                                                                                            | `8002`    |
+| Load generator         | `apm-php-bench-locust`                               | Headless Locust workload + custom OTLP metric                                                                                                                                                                                    | n/a       |
+| Collector (Locust)     | `otel-collector-locust`                              | Forwards telemetry from Locust to backend                                                                                                                                                                                        | n/a       |
+| Collector (App)        | `otel-collector-apm-php-9-alpha`                     | Forwards telemetry from APM PHP alpha to backend                                                                                                                                                                                 | n/a       |
 
 ## Prerequisites
 
@@ -98,8 +98,8 @@ Locust starts in headless mode with:
 Tasks in `locust-app/locustfile.py` call:
 
 - `http://nginx-uninstrumented/complex` as `uninstrumented`
-- `http://nginx-apm-php/complex` as `9.0.0-alpha.1`
-- `http://nginx-apm-proto/complex` as `8.13.0`
+- `http://nginx-apm-php-9-alpha/complex` as `9.0.0-alpha.1`
+- `http://nginx-apm-8/complex` as `8.13.0`
 
 Locust also publishes a custom histogram metric:
 
@@ -130,10 +130,10 @@ Available routes in `slim-app/index.php`:
 │   └── requirements.txt
 └── slim-app/
     ├── Dockerfile-uninstrumented
-    ├── Dockerfile-apm-php
-    ├── Dockerfile-apm-proto
+    ├── Dockerfile-apm-php-9-alpha
+    ├── Dockerfile-apm-8
     ├── composer-uninstrumented.json
-    ├── composer-apm-php.json
+    ├── composer-apm-php-9-alpha.json
     ├── index.php
     └── nginx-*.conf
 ```

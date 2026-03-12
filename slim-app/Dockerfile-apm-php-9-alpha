@@ -18,7 +18,7 @@ WORKDIR /var/www/html
 
 # Copy application code
 COPY index.php .
-COPY composer-apm-php.json ./composer.json
+COPY composer-apm-php-9-alpha.json ./composer.json
 
 RUN composer install
 

@@ -56,15 +56,15 @@ class FlaskSwarmUser(HttpUser):
             name="uninstrumented",
         )
     @task
-    def request_alpha(self):
+    def request_apm_php_9_alpha(self):
         self.client.get(
-            "http://nginx-apm-php/complex",
+            "http://nginx-apm-php-9-alpha/complex",
             name="9.0.0-alpha.1",
         )
     @task
-    def request_apm_proto(self):
+    def request_apm_8(self):
         self.client.get(
-            "http://nginx-apm-proto/complex",
+            "http://nginx-apm-8/complex",
             name="8.13.0",
         )
 
