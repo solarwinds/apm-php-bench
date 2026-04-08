@@ -1,0 +1,40 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+extensions:
+  solarwinds:
+    collector_name: ${env:COLLECTOR_NAME:-apm-php-bench-collector}
+    grpc: &grpc_settings
+      endpoint: ${env:OTEL_COLLECTOR}
+      tls:
+        insecure: false
+      headers:
+        Authorization: "Bearer ${env:SOLARWINDS_TOKEN}"
+
+exporters:
+  otlp:
+    <<: *grpc_settings
+
+service:
+  extensions: [solarwinds]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]

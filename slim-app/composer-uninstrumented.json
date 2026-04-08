@@ -1,0 +1,15 @@
+{
+    "require": {
+        "slim/slim": "^4",
+        "slim/psr7": "^1",
+        "guzzlehttp/guzzle": "^7.10",
+        "monolog/monolog": "^3.9",
+        "open-telemetry/opentelemetry-logger-monolog": "^1.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "tbachert/spi": true
+        }
+    }
+}

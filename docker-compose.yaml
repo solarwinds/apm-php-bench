@@ -1,0 +1,112 @@
+services:
+  otel-collector-locust:
+    image: otel/opentelemetry-collector-contrib:latest
+    environment:
+      - API_TOKEN=${OTEL_TOKEN}
+      - OTEL_COLLECTOR=${OTEL_COLLECTOR}
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+
+  otel-collector-apm-php-9-alpha:
+    image: solarwinds/solarwinds-otel-collector:latest-verified
+    environment:
+      - SOLARWINDS_TOKEN=${OTEL_TOKEN}
+      - OTEL_COLLECTOR=${OTEL_COLLECTOR}
+    volumes:
+      - ./swotel-collector-config.yaml:/opt/default-config.yaml
+
+  nginx-uninstrumented:
+    image: nginx:latest
+    ports:
+      - "8000:80"
+    volumes:
+      - ./slim-app/nginx-uninstrumented.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php-fpm-uninstrumented
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  nginx-apm-php-9-alpha:
+    image: nginx:latest
+    ports:
+      - "8001:80"
+    volumes:
+      - ./slim-app/nginx-apm-php-9-alpha.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php-fpm-apm-php-9-alpha
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  nginx-apm-8:
+    image: nginx:latest
+    ports:
+      - "8002:80"
+    volumes:
+      - ./slim-app/nginx-apm-8.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php-fpm-apm-8
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost/healthcheck" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  php-fpm-uninstrumented:
+    build:
+      context: slim-app
+      dockerfile: Dockerfile-uninstrumented
+
+  php-fpm-apm-php-9-alpha:
+    build:
+      context: slim-app
+      dockerfile: Dockerfile-apm-php-9-alpha
+    environment:
+      - OTEL_PHP_AUTOLOAD_ENABLED=true
+      - OTEL_LOG_LEVEL=warn
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector-apm-php-9-alpha:4318}
+      - OTEL_SERVICE_NAME=apm-php-bench-php-fpm-apm-php-9-alpha
+      - OTEL_TRACES_SAMPLER=solarwinds_http
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta
+      - OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION=base2_exponential_bucket_histogram
+      - SW_APM_COLLECTOR=${SW_APM_COLLECTOR:-collector}
+      - SW_APM_SERVICE_KEY=${SW_APM_TOKEN:-token}:apm-php-bench-php-fpm-apm-php-9-alpha
+      - OTEL_PROPAGATORS=baggage,tracecontext,swotracestate,xtraceoptions
+      - OTEL_EXPERIMENTAL_RESPONSE_PROPAGATORS=xtrace,xtraceoptionsresponse
+
+  php-fpm-apm-8:
+    build:
+      context: slim-app
+      dockerfile: Dockerfile-apm-8
+      args:
+        - APM_RELEASE=GA
+        - APM_VERSION=latest
+        - APM_SERVICE_KEY=${SW_APM_TOKEN:-token}:apm-php-bench-php-fpm-apm-8
+        - APM_COLLECTOR=${SW_APM_COLLECTOR:-collector}
+
+  apm-php-bench-locust:
+    build:
+      context: locust-app
+      dockerfile: Dockerfile
+    container_name: apm-php-bench-locust
+    environment:
+      - API_TOKEN=${SW_APM_TOKEN:-token}
+      - OTEL_COLLECTOR=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector-locust:4318}
+      - SERVICE_NAME=apm-php-bench-locust
+    depends_on:
+      nginx-uninstrumented:
+        condition: service_healthy
+      nginx-apm-php-9-alpha:
+        condition: service_healthy
+      nginx-apm-8:
+        condition: service_healthy
+    command: locust --headless -u 100 --spawn-rate 5 --host http://0.0.0.0:8000
