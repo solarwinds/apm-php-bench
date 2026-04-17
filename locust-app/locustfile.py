@@ -42,7 +42,7 @@ http_response_time = otel_meter.create_histogram(
 
 requests_tracker = {
     "uninstrumented": {"request_count" : 0, "request_time" : 0 },
-    "9.0.0-alpha.1": {"request_count" : 0, "request_time" : 0 },
+    "9.0.0-alpha": {"request_count" : 0, "request_time" : 0 },
     "8.13.0": {"request_count" : 0, "request_time" : 0 },
 }
 
@@ -59,7 +59,7 @@ class FlaskSwarmUser(HttpUser):
     def request_apm_php_9_alpha(self):
         self.client.get(
             "http://nginx-apm-php-9-alpha/complex",
-            name="9.0.0-alpha.1",
+            name="9.0.0-alpha",
         )
     @task
     def request_apm_8(self):
