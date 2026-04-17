@@ -160,4 +160,4 @@ services:
         condition: service_healthy
     deploy:
       resources: *load-resource
-    command: locust --headless -u 1 --spawn-rate 5 --host http://0.0.0.0:8000
+    command: locust --headless -u 25 --spawn-rate 5 --host http://0.0.0.0:8000
