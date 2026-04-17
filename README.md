@@ -91,14 +91,14 @@ Yay healthy
 
 Locust starts in headless mode with:
 
-- 100 users
+- 25 users
 - spawn rate 5
 - host `http://0.0.0.0:8000` (individual tasks call service DNS names directly)
 
 Tasks in `locust-app/locustfile.py` call:
 
 - `http://nginx-uninstrumented/complex` as `uninstrumented`
-- `http://nginx-apm-php-9-alpha/complex` as `9.0.0-alpha.1`
+- `http://nginx-apm-php-9-alpha/complex` as `9.0.0-alpha`
 - `http://nginx-apm-8/complex` as `8.13.0`
 
 Locust also publishes a custom histogram metric:
