@@ -25,22 +25,26 @@ services:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: otel-collector-locust
     logging: *logging-resource
+    user: "0"  # to access docker.sock
     environment:
       - API_TOKEN=${OTEL_TOKEN}
       - OTEL_COLLECTOR=${OTEL_COLLECTOR}
     command: [ "--config=/etc/otel-collector-config.yaml" ]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   otel-collector-apm-php-9-alpha:
     image: solarwinds/solarwinds-otel-collector:latest-verified
     container_name: otel-collector-apm-php-9-alpha
     logging: *logging-resource
+    user: "0"  # to access docker.sock
     environment:
       - SOLARWINDS_TOKEN=${OTEL_TOKEN}
       - OTEL_COLLECTOR=${OTEL_COLLECTOR}
     volumes:
       - ./swotel-collector-config.yaml:/opt/default-config.yaml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   nginx-uninstrumented:
     image: nginx:latest
