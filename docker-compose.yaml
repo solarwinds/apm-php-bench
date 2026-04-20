@@ -44,6 +44,8 @@ services:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+#  Note: Using the official OpenTelemetry Collector image here instead of SolarWinds' verified image as the docker_stats receiver has errors in v0.145.0.
+#  When the docker_stats receiver is fixed, we can switch back to the verified image to ensure we're testing with the same collector that APM uses in production.
 #  otel-collector-apm-php-9-alpha:
 #    image: solarwinds/solarwinds-otel-collector:latest-verified
 #    container_name: otel-collector-apm-php-9-alpha
