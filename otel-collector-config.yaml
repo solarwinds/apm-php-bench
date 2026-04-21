@@ -5,6 +5,7 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  docker_stats:
 
 exporters:
   otlp:
@@ -17,14 +18,14 @@ processors:
 service:
   pipelines:
     traces:
-      receivers: [otlp/notls]
-      processors: [batch]
-      exporters: [otlp]
+      receivers: [ otlp/notls ]
+      processors: [ batch ]
+      exporters: [ otlp ]
     metrics:
-      receivers: [otlp/notls]
-      processors: [batch]
-      exporters: [otlp]
+      receivers: [ otlp/notls, docker_stats ]
+      processors: [ batch ]
+      exporters: [ otlp ]
     logs:
-      receivers: [otlp/notls]
-      processors: [batch]
-      exporters: [otlp]
+      receivers: [ otlp/notls ]
+      processors: [ batch ]
+      exporters: [ otlp ]

@@ -1,19 +1,21 @@
 # apm-php-bench
 
-Benchmark three PHP runtime/instrumentation variants under the same load profile and compare their telemetry and response time behavior.
+Benchmark four PHP runtime/instrumentation variants under the same load profile and compare their telemetry and response time behavior.
 
 ## What this repo does
 
 This stack runs:
 
-- A Slim PHP app in 3 variants:
+- A Slim PHP app in 4 variants:
   - `uninstrumented` (uninstrumented)
   - `apm-php-9-alpha` ([solarwinds/apm](https://packagist.org/packages/solarwinds/apm) + [solarwinds/apm_ext](https://packagist.org/packages/solarwinds/apm_ext) + [swotel collector](https://github.com/solarwinds/solarwinds-otel-collector-releases))
+  - `otel` (OpenTelemetry PHP auto-instrumentation)
   - `apm-8` (Current GA Solarwinds APM PHP library)
-- A Locust load generator that continuously hits all 3 variants.
-- Two collectors:
+- A Locust load generator that continuously hits all 4 variants.
+- Three collectors:
   - `otel-collector-locust` for Locust OTLP metrics export
   - `otel-collector-apm-php-9-alpha` for [solarwinds/apm](https://packagist.org/packages/solarwinds/apm) telemetry export
+  - `otel-collector-otel` for OpenTelemetry PHP telemetry export
 
 The default benchmark target route is `/complex`, which intentionally creates spans and emits app-side metrics/logs to stress instrumentation overhead.
 
@@ -23,10 +25,12 @@ The default benchmark target route is `/complex`, which intentionally creates sp
 |------------------------|------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
 | Slim baseline          | `nginx-uninstrumented` -> `php-fpm-uninstrumented`   | No APM instrumentation                                                                                                                                                                                                           | `8000`    |
 | Slim + apm-php-9-alpha | `nginx-apm-php-9-alpha` -> `php-fpm-apm-php-9-alpha` | [solarwinds/apm](https://packagist.org/packages/solarwinds/apm) + [solarwinds/apm_ext](https://packagist.org/packages/solarwinds/apm_ext) + [swotel collector](https://github.com/solarwinds/solarwinds-otel-collector-releases) | `8001`    |
-| Slim + apm-8           | `nginx-apm-8` -> `php-fpm-apm-8`                     | Current GA Solarwinds APM PHP library                                                                                                                                                                                            | `8002`    |
+| Slim + otel            | `nginx-otel` -> `php-fpm-otel`                       | OpenTelemetry PHP auto-instrumentation exporting OTLP telemetry                                                                                                                                                                  | `8002`    |
+| Slim + apm-8           | `nginx-apm-8` -> `php-fpm-apm-8`                     | Current GA Solarwinds APM PHP library                                                                                                                                                                                            | `8003`    |
 | Load generator         | `apm-php-bench-locust`                               | Headless Locust workload + custom OTLP metric                                                                                                                                                                                    | n/a       |
 | Collector (Locust)     | `otel-collector-locust`                              | Forwards telemetry from Locust to backend                                                                                                                                                                                        | n/a       |
-| Collector (App)        | `otel-collector-apm-php-9-alpha`                     | Forwards telemetry from APM PHP alpha to backend                                                                                                                                                                                 | n/a       |
+| Collector (alpha)      | `otel-collector-apm-php-9-alpha`                     | Forwards telemetry from APM PHP alpha to backend                                                                                                                                                                                 | n/a       |
+| Collector (otel)       | `otel-collector-otel`                                | Forwards telemetry from OpenTelemetry PHP app to backend                                                                                                                                                                         | n/a       |
 
 ## Prerequisites
 
@@ -79,6 +83,7 @@ After startup, verify health endpoints:
 curl -fsS http://localhost:8000/healthcheck
 curl -fsS http://localhost:8001/healthcheck
 curl -fsS http://localhost:8002/healthcheck
+curl -fsS http://localhost:8003/healthcheck
 ```
 
 Expected response:
@@ -91,14 +96,15 @@ Yay healthy
 
 Locust starts in headless mode with:
 
-- 100 users
+- 8 users
 - spawn rate 5
 - host `http://0.0.0.0:8000` (individual tasks call service DNS names directly)
 
 Tasks in `locust-app/locustfile.py` call:
 
 - `http://nginx-uninstrumented/complex` as `uninstrumented`
-- `http://nginx-apm-php-9-alpha/complex` as `9.0.0-alpha.1`
+- `http://nginx-apm-php-9-alpha/complex` as `9.0.0-alpha`
+- `http://nginx-otel/complex` as `otel`
 - `http://nginx-apm-8/complex` as `8.13.0`
 
 Locust also publishes a custom histogram metric:
@@ -131,9 +137,11 @@ Available routes in `slim-app/index.php`:
 └── slim-app/
     ├── Dockerfile-uninstrumented
     ├── Dockerfile-apm-php-9-alpha
+    ├── Dockerfile-otel
     ├── Dockerfile-apm-8
     ├── composer-uninstrumented.json
     ├── composer-apm-php-9-alpha.json
+    ├── composer-otel.json
     ├── index.php
     └── nginx-*.conf
 ```
