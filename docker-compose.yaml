@@ -214,4 +214,4 @@ services:
         condition: service_healthy
       nginx-apm-8:
         condition: service_healthy
-    command: locust --headless -u 50 --spawn-rate 5 --host http://0.0.0.0:8000
+    command: locust --headless -u 3 --spawn-rate 5 --host http://0.0.0.0:8000
