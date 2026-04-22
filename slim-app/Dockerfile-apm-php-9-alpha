@@ -15,10 +15,10 @@ RUN pie install open-telemetry/ext-opentelemetry
 RUN pie install solarwinds/apm_ext
 
 # Append the new limit to the official image's override file
-RUN echo 'pm.max_children = 15' >> /usr/local/etc/php-fpm.d/zz-docker.conf
-RUN echo 'pm.start_servers = 6' >> /usr/local/etc/php-fpm.d/zz-docker.conf
+RUN echo 'pm.max_children = 20' >> /usr/local/etc/php-fpm.d/zz-docker.conf
+RUN echo 'pm.start_servers = 8' >> /usr/local/etc/php-fpm.d/zz-docker.conf
 RUN echo 'pm.min_spare_servers = 1' >> /usr/local/etc/php-fpm.d/zz-docker.conf
-RUN echo 'pm.max_spare_servers = 11' >> /usr/local/etc/php-fpm.d/zz-docker.conf
+RUN echo 'pm.max_spare_servers = 15' >> /usr/local/etc/php-fpm.d/zz-docker.conf
 
 WORKDIR /var/www/html
 
