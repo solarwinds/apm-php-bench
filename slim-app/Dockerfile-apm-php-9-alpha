@@ -14,11 +14,13 @@ RUN mv pie.phar /usr/local/bin/pie
 RUN pie install open-telemetry/ext-opentelemetry
 RUN pie install solarwinds/apm_ext
 
-# Append PHP-FPM pool process manager settings to the official image's override file
-RUN echo 'pm.max_children = 20' >> /usr/local/etc/php-fpm.d/zz-docker.conf
-RUN echo 'pm.start_servers = 10' >> /usr/local/etc/php-fpm.d/zz-docker.conf
-RUN echo 'pm.min_spare_servers = 1' >> /usr/local/etc/php-fpm.d/zz-docker.conf
-RUN echo 'pm.max_spare_servers = 19' >> /usr/local/etc/php-fpm.d/zz-docker.conf
+# Write image-specific PHP-FPM pool settings into a dedicated config fragment
+RUN printf '%s\n' \
+    'pm.max_children = 20' \
+    'pm.start_servers = 10' \
+    'pm.min_spare_servers = 1' \
+    'pm.max_spare_servers = 19' \
+    > /usr/local/etc/php-fpm.d/zz-app-pm.conf
 
 WORKDIR /var/www/html
 
