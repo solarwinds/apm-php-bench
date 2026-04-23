@@ -12,6 +12,14 @@ WORKDIR /var/www/html
 COPY index.php .
 COPY composer-uninstrumented.json ./composer.json
 
+# Write image-specific PHP-FPM pool settings into a dedicated config fragment
+RUN printf '%s\n' \
+    'pm.max_children = 20' \
+    'pm.start_servers = 10' \
+    'pm.min_spare_servers = 1' \
+    'pm.max_spare_servers = 19' \
+    > /usr/local/etc/php-fpm.d/zz-app-pm.conf
+
 RUN composer install
 
 # Expose port for PHP-FPM

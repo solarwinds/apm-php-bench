@@ -23,6 +23,14 @@ RUN fileserver=$(test ${APM_RELEASE} = GA && echo "agent-binaries.cloud.solarwin
       --url=https://${fileserver}/apm/php \
       --version=${APM_VERSION}
 
+# Write image-specific PHP-FPM pool settings into a dedicated config fragment
+RUN printf '%s\n' \
+    'pm.max_children = 20' \
+    'pm.start_servers = 10' \
+    'pm.min_spare_servers = 1' \
+    'pm.max_spare_servers = 19' \
+    > /usr/local/etc/php-fpm.d/zz-app-pm.conf
+
 WORKDIR /var/www/html
 
 # Copy application code
