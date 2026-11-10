@@ -158,13 +158,13 @@ services:
       - OTEL_LOG_LEVEL=warning
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector-apm-php-9-alpha:4318}
       - OTEL_SERVICE_NAME=apm-php-bench-php-fpm-apm-php-9-alpha
-      - OTEL_TRACES_SAMPLER=solarwinds_http
+      - OTEL_TRACES_SAMPLER=swo_http
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta
       - OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION=base2_exponential_bucket_histogram
       - SW_APM_COLLECTOR=${SW_APM_COLLECTOR:-collector}
-      - SW_APM_SERVICE_KEY=${SW_APM_TOKEN:-token}:apm-php-bench-php-fpm-apm-php-9-alpha
-      - OTEL_PROPAGATORS=baggage,tracecontext,swotracestate,xtraceoptions
-      - OTEL_EXPERIMENTAL_RESPONSE_PROPAGATORS=xtrace,xtraceoptionsresponse
+      - SW_APM_SERVICE_KEY=${SW_APM_TOKEN:-token}
+      - OTEL_PROPAGATORS=baggage,tracecontext,swo_tracestate,swo_xtraceoptions
+      - OTEL_EXPERIMENTAL_RESPONSE_PROPAGATORS=swo_xtrace,swo_xtraceoptionsresponse
 
   php-fpm-otel:
     build:
