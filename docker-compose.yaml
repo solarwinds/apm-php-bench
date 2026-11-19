@@ -154,7 +154,6 @@ services:
     container_name: php-fpm-apm-php-9-alpha
     logging: *logging-resource
     environment:
-      - OTEL_PHP_AUTOLOAD_ENABLED=true
       - OTEL_LOG_LEVEL=warning
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector-apm-php-9-alpha:4318}
       - OTEL_SERVICE_NAME=apm-php-bench-php-fpm-apm-php-9-alpha
